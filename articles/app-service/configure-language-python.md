@@ -20,7 +20,7 @@ This article describes how [Azure App Service](overview.md) runs Python apps, ho
 The App Service deployment engine automatically activates a virtual environment and runs `pip install -r requirements.txt` for you when you deploy a [Git repository](deploy-local-git.md), or when you deploy a [zip package](deploy-zip.md) [with build automation enabled](deploy-zip.md#enable-build-automation-for-zip-deploy).
 
 > [!NOTE]
-> Currently App Service requires `requirements.txt` in your project's root directory, even if you're using modern Python packaging tools such as `pyproject.toml`.
+> Currently App Service requires `requirements.txt` in your project's root directory, even if you're using modern Python packaging tools that use `pyproject.toml` for configuration. See the section below on using modern package managers.
 
 This guide provides key concepts and instructions for Python developers who use a built-in Linux container in App Service. If you've never used Azure App Service, first follow the [Python quickstart](quickstart-python.md) and [Flask](tutorial-python-postgresql-app-flask.md), [Django](tutorial-python-postgresql-app-django.md), or [FastAPI](tutorial-python-postgresql-app-fastapi.md) with PostgreSQL tutorial.
 
@@ -67,13 +67,64 @@ You can run an unsupported version of Python by building your own container imag
 <!-- <a> element here to preserve external links-->
 <a name="access-environment-variables"></a>
 
+## Using modern package managers
+
+App Service only supports dependency installation through `requirements.txt` and does not directly support `pyproject.toml` at the moment. If you're using tools like Poetry or uv, you can generate a compatible `requirements.txt` file using these approaches:
+
+### Generate requirements.txt locally
+
+#### Using Poetry
+
+Using [Poetry](https://python-poetry.org/) with the [export plugin](https://github.com/python-poetry/poetry-plugin-export):
+
+```sh
+
+poetry export -f requirements.txt --output requirements.txt --without-hashes
+
+```
+
+#### Using uv
+
+Using [uv](https://docs.astral.sh/uv/concepts/projects/sync/#exporting-the-lockfile):
+
+```sh
+
+uv export --format requirements-txt --no-hashes --output-file requirements.txt
+
+```
+
+### Generate requirements.txt during deployment
+
+Configure the `PRE_BUILD_COMMAND` setting in your app settings:
+
+#### Poetry
+
+```
+
+PRE_BUILD_COMMAND="pip install poetry poetry-plugin-export && poetry export -f requirements.txt --output requirements.txt --without-hashes"
+
+```
+
+#### uv
+
+```
+
+PRE_BUILD_COMMAND="pip install uv && uv export --format requirements-txt --no-hashes --output-file requirements.txt"
+
+```
+
+> **Note**: When using `PRE_BUILD_COMMAND`, ensure that `SCM_DO_BUILD_DURING_DEPLOYMENT` is set to `true` or `1`.
+
+
 ## Customize build automation
 
 App Service's build system, called Oryx, performs the following steps when you deploy your app, if the app setting `SCM_DO_BUILD_DURING_DEPLOYMENT` is set to `1`:
 
 1. Run a custom pre-build script, if that step is specified by the `PRE_BUILD_COMMAND` setting. (The script can itself run other Python and Node.js scripts, pip and npm commands, and Node-based tools like yarn, for example, `yarn install` and `yarn build`.)
 
-1. Run `pip install -r requirements.txt`. The *requirements.txt* file must be present in the project's root folder. Otherwise, the build process reports the error: "Could not find setup.py or requirements.txt; Not running pip install."
+1. Run `pip install -r requirements.txt`. The *requirements.txt* file must be present in the project's root folder. Otherwise, the build process reports the error: "Could not find setup.py or requirements.txt; Not running pip install." 
+    
+1. If *manage.py* is found in the root of the repository (indicating a Django app), run *manage.py collectstatic*. However, if the `DISABLE_COLLECTSTATIC` setting is `true`, this step is skipped.
 
 1. If *manage.py* is found in the root of the repository (indicating a Django app), run *manage.py collectstatic*. However, if the `DISABLE_COLLECTSTATIC` setting is `true`, this step is skipped.
 
