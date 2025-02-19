@@ -22,7 +22,7 @@ The App Service deployment engine automatically activates a virtual environment 
 > [!NOTE]
 > Currently App Service requires `requirements.txt` in your project's root directory even if you have a `pyproject.toml`. If you're using modern Python packaging tools with `pyproject.toml`, you can generate a requirements.txt before deployment:
 >
-> Using [Poetry](https://python-poetry.org/) with the [export plugin](https://github.com/python-poetry/poetry-plugin-export):
+> Using [Poetry](https://python-poetry.org/) with the [export plugin](https://github.com/python-poetry/poetry-plugin-export?tab=readme-ov-file#usage):
 > ```sh
 > poetry export -f requirements.txt --output requirements.txt --without-hashes
 > ```
