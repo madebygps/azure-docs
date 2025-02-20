@@ -20,7 +20,7 @@ This article describes how [Azure App Service](overview.md) runs Python apps, ho
 The App Service deployment engine automatically activates a virtual environment and runs `pip install -r requirements.txt` for you when you deploy a [Git repository](deploy-local-git.md), or when you deploy a [zip package](deploy-zip.md) [with build automation enabled](deploy-zip.md#enable-build-automation-for-zip-deploy).
 
 > [!NOTE]
-> Currently App Service requires `requirements.txt` in your project's root directory even if you have a `pyproject.toml`. See [converting dependencies from modern Python package managers](#converting-dependencies-from-modern-python-package-managers) for recommended approaches.
+> Currently App Service requires `requirements.txt` in your project's root directory even if you have a `pyproject.toml`. See [Generate requirements.txt from pyproject.toml](#generate-requirementstxt-from-pyprojecttoml) for recommended approaches.
 
 
 This guide provides key concepts and instructions for Python developers who use a built-in Linux container in App Service. If you've never used Azure App Service, first follow the [Python quickstart](quickstart-python.md) and [Flask](tutorial-python-postgresql-app-flask.md), [Django](tutorial-python-postgresql-app-django.md), or [FastAPI](tutorial-python-postgresql-app-fastapi.md) with PostgreSQL tutorial.
@@ -104,11 +104,11 @@ For more information on how App Service runs and builds Python apps in Linux, se
 > [!NOTE]
 > Always use relative paths in all pre- and post-build scripts because the build container in which Oryx runs is different from the runtime container in which the app runs. Never rely on the exact placement of your app project folder within the container (for example, that it's placed under *site/wwwroot*).
 
-## Generating requirements.txt from pyproject.toml
+## Generate requirements.txt from pyproject.toml
 
 App Service only supports dependency installation through `requirements.txt` and does not directly support `pyproject.toml` at the moment.  If you're using tools like Poetry or uv, you can generate a compatible `requirements.txt` in several ways:
 
-### Converting dependencies from modern Python package managers
+### Generate before deployment 
 
 #### Using Poetry
 
@@ -130,7 +130,7 @@ uv export --format requirements-txt --no-hashes --output-file requirements.txt
 
 ```
 
-### Generate requirements.txt during deployment using PRE_BUILD_COMMAND
+### Generate during deployment using PRE_BUILD_COMMAND
 
 The approach differs depending on your Python version:
 
