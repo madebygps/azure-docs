@@ -132,16 +132,12 @@ uv export --format requirements-txt --no-hashes --output-file requirements.txt
 
 ### Generate during deployment using PRE_BUILD_COMMAND
 
-The approach differs depending on your Python version:
-
-#### Python 3.11
+You can set this as your value in `PRE_BUILD_COMMAND` setting:
 
 ```sh
-pip install --cache-dir /usr/local/share/pip-cache uv && uv export --format requirements-txt --no-hashes --output-file requirements.txt
+source /opt/oryx/benv python dynamic_install_root_dir="/tmp/oryx/platforms" && python3 -m pip install uv && uv export --format requirements-txt --no-hashes --output-file requirements.txt
 ```
 
-#### Python 3.12+
-TODO
 
 ## Migrate existing applications to Azure
 
