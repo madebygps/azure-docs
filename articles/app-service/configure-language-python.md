@@ -106,11 +106,9 @@ For more information on how App Service runs and builds Python apps in Linux, se
 
 ## Generate requirements.txt from pyproject.toml
 
-App Service only supports dependency installation through `requirements.txt` and does not directly support `pyproject.toml` at the moment.  If you're using tools like Poetry or uv, you can generate a compatible `requirements.txt` in several ways:
+App Service does not directly support `pyproject.toml` at the moment.  If you're using tools like Poetry or uv, the recommended approach is to generate a compatible `requirements.txt` before deployment in your project's root:
 
-### Generate before deployment 
-
-#### Using Poetry
+### Using Poetry
 
 Using [Poetry](https://python-poetry.org/) with the [export plugin](https://github.com/python-poetry/poetry-plugin-export):
 
@@ -120,7 +118,7 @@ poetry export -f requirements.txt --output requirements.txt --without-hashes
 
 ```
 
-#### Using uv
+### Using uv
 
 Using [uv](https://docs.astral.sh/uv/concepts/projects/sync/#exporting-the-lockfile):
 
@@ -128,14 +126,6 @@ Using [uv](https://docs.astral.sh/uv/concepts/projects/sync/#exporting-the-lockf
 
 uv export --format requirements-txt --no-hashes --output-file requirements.txt
 
-```
-
-### Generate during deployment using PRE_BUILD_COMMAND
-
-You can set this as your value in `PRE_BUILD_COMMAND` setting:
-
-```sh
-source /opt/oryx/benv python dynamic_install_root_dir="/tmp/oryx/platforms" && python3 -m pip install uv && uv export --format requirements-txt --no-hashes --output-file requirements.txt
 ```
 
 
